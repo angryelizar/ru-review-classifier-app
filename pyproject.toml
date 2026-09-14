@@ -1,0 +1,21 @@
+[project]
+name = "ru-review-classifier-app"
+version = "0.1.0"
+description = "FastAPI demo app for Russian review sentiment classification (fine-tuned ruBert)"
+authors = [
+    { name = "angryelizar", email = "conovalov.elizar@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "datasets>=5.0.1",
+    "fastapi>=0.141.1",
+    "huggingface-hub>=1.31.0",
+    "jinja2>=3.1.6",
+    "pydantic-settings>=2.15.0",
+    "torch>=2.14.0",
+    "transformers>=5.17.0",
+    "uvicorn[standard]>=0.52.4",
+]
+
+[tool.uv]
+package = false

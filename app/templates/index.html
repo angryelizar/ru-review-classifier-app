@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="glitch" data-text="{{ app_title }}">{{ app_title }}</h1>
+            <p class="subtitle">hello, friend. russian review sentiment classifier</p>
+
+            <div class="status-bar">
+                <span class="status {{ 'ok' if model_ready else 'err' }}">
+                    [model: {{ model_repo_id }} — {{ 'online' if model_ready else 'offline' }}]
+                </span>
+                <span class="status {{ 'ok' if dataset_ready else 'err' }}">
+                    [dataset: {{ dataset_repo_id }} — {{ 'online' if dataset_ready else 'offline' }}]
+                </span>
+            </div>
+            {% if model_error %}
+            <div class="error-banner">> model_error: {{ model_error }}</div>
+            {% endif %}
+            {% if dataset_error %}
+            <div class="error-banner">> dataset_error: {{ dataset_error }}</div>
+            {% endif %}
+
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="demo">> demo</button>
+                <button class="tab-btn" data-tab="about">> how_it_was_built</button>
+            </nav>
+        </header>
+
+        <!-- ==================== TAB: DEMO ==================== -->
+        <main id="tab-demo" class="tab-content active">
+
+            <section class="terminal-block">
+                <div class="block-header">
+                    <span class="prompt">root@fsociety:~#</span> ./get_test_review.sh
+                </div>
+                <div class="block-body">
+                    <div class="btn-row">
+                        <button id="btn-sample" class="btn">Получить отзыв</button>
+                        <button id="btn-copy" class="btn btn-secondary" disabled>Копировать</button>
+                        <button id="btn-to-predict" class="btn btn-secondary" disabled>В оценку &darr;</button>
+                    </div>
+                    <div id="sample-meta" class="sample-meta hidden"></div>
+                    <pre id="sample-text" class="text-output empty">// здесь появится случайный отзыв из test-сплита датасета</pre>
+                </div>
+            </section>
+
+            <section class="terminal-block">
+                <div class="block-header">
+                    <span class="prompt">root@fsociety:~#</span> ./predict_sentiment.sh --stdin
+                </div>
+                <div class="block-body">
+                    <textarea id="predict-input" class="text-input" rows="5"
+                        placeholder="> вставь текст отзыва сюда..."></textarea>
+                    <div class="btn-row">
+                        <button id="btn-predict" class="btn">Оценить</button>
+                        <button id="btn-clear" class="btn btn-secondary">Очистить</button>
+                    </div>
+                    <div id="predict-result" class="hidden">
+                        <div class="verdict">
+                            verdict: <span id="predict-label" class="verdict-label"></span>
+                            <span id="predict-score" class="verdict-score"></span>
+                        </div>
+                        <div id="predict-bars" class="bars"></div>
+                    </div>
+                    <div id="predict-error" class="error-banner hidden"></div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ==================== TAB: ABOUT ==================== -->
+        <main id="tab-about" class="tab-content">
+
+            <section class="terminal-block">
+                <div class="block-header"><span class="prompt">></span> 01_model_selection</div>
+                <div class="block-body about-block">
+                    <h3>Выбор модели для fine-tuning</h3>
+                    <p class="placeholder">// TODO: описать выбор базовой модели</p>
+                </div>
+            </section>
+
+            <section class="terminal-block">
+                <div class="block-header"><span class="prompt">></span> 02_dataset_preparation</div>
+                <div class="block-body about-block">
+                    <h3>Выбор и подготовка датасета/датасетов</h3>
+                    <p class="placeholder">// TODO: описать датасеты и их подготовку</p>
+                </div>
+            </section>
+
+            <section class="terminal-block">
+                <div class="block-header"><span class="prompt">></span> 03_fine_tuning</div>
+                <div class="block-body about-block">
+                    <h3>Fine-tune модели</h3>
+                    <p class="placeholder">// TODO: описать процесс обучения</p>
+                </div>
+            </section>
+
+            <section class="terminal-block">
+                <div class="block-header"><span class="prompt">></span> 04_model_testing</div>
+                <div class="block-body about-block">
+                    <h3>Тестирование модели</h3>
+                    <p class="placeholder">// TODO: метрики и результаты тестирования</p>
+                </div>
+            </section>
+
+            <section class="terminal-block">
+                <div class="block-header"><span class="prompt">></span> 05_web_app</div>
+                <div class="block-body about-block">
+                    <h3>Разработка веб-приложения</h3>
+                    <p class="placeholder">// TODO: FastAPI + Jinja2 + чистый JS</p>
+                </div>
+            </section>
+
+            <section class="terminal-block">
+                <div class="block-header"><span class="prompt">></span> 06_packaging</div>
+                <div class="block-body about-block">
+                    <h3>Упаковка работы для демонстрации</h3>
+                    <p class="placeholder">// TODO: как всё упаковано для демо</p>
+                </div>
+            </section>
+
+        </main>
+
+        <footer>
+            <span class="prompt">></span> we are fsociety <span class="cursor">_</span>
+        </footer>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
