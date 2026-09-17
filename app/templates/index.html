@@ -86,23 +86,64 @@
                 <div class="block-header"><span class="prompt">></span> 01_model_selection</div>
                 <div class="block-body about-block">
                     <h3>Выбор модели для fine-tuning</h3>
-                    <p class="placeholder">// TODO: описать выбор базовой модели</p>
+                    <p>В рамках задачи анализа тональности пользовательских отзывов я решил работать с текстами на русском языке, а значит мне требовалась модель BERT, предобученная именно на русском корпусе. Выбор пал на модели от команды Сбера:</p>
+                    <ul>
+                        <li><a href="https://huggingface.co/ai-forever/ruRoberta-large" target="_blank">ai-forever/ruRoberta-large</a> — 355 млн параметров, обучена на 250 ГБ данных</li>
+                        <li><a href="https://huggingface.co/ai-forever/ruBert-base" target="_blank">ai-forever/ruBert-base</a> — 178 млн параметров, обучена на 30 ГБ данных</li>
+                    </ul>
+                    <p>В процессе обучения выяснилось, что бесплатных ресурсов Google Colab не хватает для работы с ruRoberta-large, поэтому основной моделью стала <strong>ruBert-base</strong>.</p>
                 </div>
             </section>
 
             <section class="terminal-block">
                 <div class="block-header"><span class="prompt">></span> 02_dataset_preparation</div>
                 <div class="block-body about-block">
-                    <h3>Выбор и подготовка датасета/датасетов</h3>
-                    <p class="placeholder">// TODO: описать датасеты и их подготовку</p>
+                    <h3>Выбор и подготовка датасета</h3>
+                    <p>Самым крупным из найденных оказался датасет отзывов с Яндекс Карт — <a href="https://huggingface.co/datasets/d0rj/geo-reviews-dataset-2023" target="_blank">Geo Reviews Dataset 2023 (Yandex)</a>, 500 тысяч строк. Проблема в том, что оценки в нём были представлены по шкале от 1 до 5, что не соответствовало нужным трём классам.</p>
+                    <p>К счастью, нашёлся уже собранный из нескольких источников датасет отзывов на русском языке — <a href="https://huggingface.co/datasets/k1tub/sentiment_dataset" target="_blank">k1tub/sentiment_dataset</a>. В нём около 300 тысяч строк: большая часть также взята из датасета Яндекса, но есть и отзывы на товары одной из сетей супермаркетов, а также ещё несколько источников. Отзывы уже были размечены по трём нужным классам (neutral, positive, negative).</p>
+                    <h4>Шаги подготовки</h4>
+                    <ol>
+                        <li>Токенизировал весь датасет токенизатором модели (BPE)</li>
+                        <li>Посчитал количество токенов на текст</li>
+                        <li>Посмотрел на распределение по перцентилям (p1, p5, p25, p50, p75, p90, p95, p99)</li>
+                        <li>Вручную просмотрел примеры из нижнего хвоста распределения</li>
+                        <li>Выбрал <code>max_length</code> по верхним перцентилям (для токенизации с обрезкой — truncation)</li>
+                        <li>Разбил датасет на train (80%) и eval (20%) со стратификацией по классу</li>
+                    </ol>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/percentile-distribution-chart.jpg" alt="Распределение перцентилей токенов">
+                        <p class="screenshot-caption">Анализ распределения длины токенов по классам</p>
+                    </div>
+
+                    <div class="insight-note">
+                        <strong>Вывод:</strong> для токенизации выбран <code>padding</code> с <code>max_length = 267</code> токенов — стандартные 500 оказались избыточны для наших данных. Интересное наблюдение: негативные отзывы в среднем длиннее положительных и нейтральных.
+                    </div>
+
+                    <h4>Артефакты</h4>
+                    <ul class="artifacts-list">
+                        <li><a href="https://github.com/angryelizar/dataset_prepare" target="_blank">dataset_prepare</a> — инструмент для подготовки датасета</li>
+                        <li><a href="https://huggingface.co/datasets/angryelizar/sentiment_dataset_splitted" target="_blank">sentiment_dataset_splitted</a> — версия датасета с eval- и test-сплитами</li>
+                        <li><a href="https://huggingface.co/datasets/angryelizar/sentiment_dataset_splitted_short" target="_blank">Уменьшенная вдвое версия</a> — использовалась для более быстрого обучения</li>
+                    </ul>
                 </div>
             </section>
 
             <section class="terminal-block">
                 <div class="block-header"><span class="prompt">></span> 03_fine_tuning</div>
                 <div class="block-body about-block">
-                    <h3>Fine-tune модели</h3>
-                    <p class="placeholder">// TODO: описать процесс обучения</p>
+                    <h3>Fine-tuning модели</h3>
+                    <p>Изначально планировал обучать более крупную модель, ruRoberta-large, но Google Colab быстро дал понять, что бесплатных ресурсов на это не хватит (не хватало памяти). Пришлось перейти на модель поменьше — <a href="https://huggingface.co/ai-forever/ruBert-base" target="_blank">ruBert-base</a>.</p>
+                    <p>На старте пришлось подбирать значения <code>batch_size</code> и <code>num_workers</code>: число воркеров установил на 2, а размер батча начал с 32, но позже увеличил до 48.</p>
+                    <p>Чтобы быстрее получать результат и прогонять больше эпох, использовал сокращённую версию датасета. Однако лучший итоговый результат дала всего одна полная эпоха на данных из полного train-сплита.</p>
+
+                    <h4>Артефакты</h4>
+                    <ul class="artifacts-list">
+                        <li><a href="https://github.com/angryelizar/review-classifier-finetune/tree/main" target="_blank">review-classifier-finetune</a> — весь код для fine-tuning</li>
+                        <li><a href="https://huggingface.co/angryelizar/ruBert-base-sentiment-classifier-v2" target="_blank">ruBert-base-sentiment-classifier-v2</a> — итоговая модель первой итерации (маленький датасет)</li>
+                        <li><a href="https://huggingface.co/angryelizar/ruBert-base-sentiment-classifier-full-dataset" target="_blank">ruBert-base-sentiment-classifier-full-dataset</a> — итоговая модель второй итерации (полный датасет)</li>
+                        <li><a href="https://huggingface.co/angryelizar/ruBert-base-sentiment-classifier-full-dataset-epoch-1" target="_blank">ruBert-base-sentiment-classifier-full-dataset-epoch-1</a> — модель после первой эпохи второй итерации (используется в веб-приложении)</li>
+                    </ul>
                 </div>
             </section>
 
@@ -110,7 +151,68 @@
                 <div class="block-header"><span class="prompt">></span> 04_model_testing</div>
                 <div class="block-body about-block">
                     <h3>Тестирование модели</h3>
-                    <p class="placeholder">// TODO: метрики и результаты тестирования</p>
+                    <h4>Базовые модели (без fine-tuning)</h4>
+                    <p>Точность около 30–35% в зависимости от размера тестового сплита.</p>
+
+                    <div class="code-block">
+                        model_name = "ai-forever/ruBert-base"<br>
+                        dataset_name = "angryelizar/sentiment_dataset_splitted_short"<br>
+                        2905 rows test
+                    </div>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/ruBert-base-sentiment_dataset_splitted_short.jpg" alt="Результаты baseline на сокращённом датасете">
+                        <p class="screenshot-caption">Baseline на сокращённом датасете (2905 строк)</p>
+                    </div>
+
+                    <div class="code-block">
+                        model_name = "ai-forever/ruBert-base"<br>
+                        dataset_name = "angryelizar/sentiment_dataset_splitted"<br>
+                        5810 rows test
+                    </div>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/ruBert-base-sentiment_dataset_splitted.jpg" alt="Результаты baseline на полном датасете">
+                        <p class="screenshot-caption">Baseline на полном датасете (5810 строк)</p>
+                    </div>
+
+                    <h4>После fine-tuning</h4>
+                    <p>На сокращённом датасете максимум по общей точности составил около 75%. Этот показатель достигался уже после первой эпохи, а последующие эпохи не давали заметного улучшения — в некоторых случаях результат даже немного ухудшался.</p>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/ruBert-base-sentiment_dataset_splitted-short-2-epochs.jpg" alt="Модель на сокращённом датасете после 2 эпох">
+                        <p class="screenshot-caption">Сокращённый датасет (100k записей) — 2 эпохи</p>
+                    </div>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/ruBert-base-sentiment_dataset_splitted-short-5-epochs.jpg" alt="Модель на сокращённом датасете после 5 эпох">
+                        <p class="screenshot-caption">Сокращённый датасет (100k записей) — 5 эпох</p>
+                    </div>
+
+                    <p>Лучшим решением оказалось прогнать ту же модель на полном датасете (около 300 тысяч записей) — результат улучшился на пару процентов.</p>
+
+                    <div class="code-block">
+                        model_name = "angryelizar/ruBert-base-sentiment-classifier-full-dataset-epoch-1"<br>
+                        dataset_name = "angryelizar/sentiment_dataset_splitted"<br>
+                        5810 rows test
+                    </div>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/ruBert-base-sentiment_dataset_splitted-1-epoch.jpg" alt="Модель на полном датасете после 1 эпохи">
+                        <p class="screenshot-caption">Полный датасет — 1 эпоха (точность ~77%)</p>
+                    </div>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/ruBert-base-sentiment_dataset_splitted-2-epoch.jpg" alt="Модель на полном датасете после 2 эпох">
+                        <p class="screenshot-caption">Полный датасет — 2 эпохи (точность ~76%)</p>
+                    </div>
+
+                    <div class="insight-note">
+                        <strong>Переобучение:</strong> на первой эпохе точность ~77%, на второй ~76%. Это признак переобучения, поэтому в приложении используется именно модель из первой эпохи второй итерации.
+                    </div>
+
+                    <p>Обратная связь в группе показала, что основная проблема — в различении нейтральных и негативных отзывов: нейтральный отзыв чаще всего ошибочно относится к негативному классу. На первый взгляд это похоже на когнитивную сложность, характерную и для человека, но вероятная причина в другом: исходные отзывы изначально оценивались по 5- или 10-балльной шкале, поэтому датасету, возможно, требуется дополнительная обработка — например, отбор по паре тысяч наиболее показательных записей для каждого класса.</p>
+                    <p>Буду рад любому ревью модели и результатов обучения — вполне допускаю, что мог что-то упустить. Если у вас есть предметные рекомендации по улучшению результата, обязательно попробую их реализовать и поделюсь итогами.</p>
                 </div>
             </section>
 
@@ -118,7 +220,14 @@
                 <div class="block-header"><span class="prompt">></span> 05_web_app</div>
                 <div class="block-body about-block">
                     <h3>Разработка веб-приложения</h3>
-                    <p class="placeholder">// TODO: FastAPI + Jinja2 + чистый JS</p>
+                    <p>Веб-приложение сгенерировано one-shot промптом в модели Kimi K3.</p>
+
+                    <div class="screenshot-block">
+                        <img src="/static/images/prompt.png" alt="Промпт для генерации веб-приложения">
+                        <p class="screenshot-caption">One-shot промпт, использованный для генерации приложения</p>
+                    </div>
+
+                    <p>Веб-приложение не было основной частью работы, поэтому я не уделял ему много внимания, но всё протестировал — вроде бы всё работает. Надеюсь, тестировать было удобно.</p>
                 </div>
             </section>
 
@@ -126,7 +235,7 @@
                 <div class="block-header"><span class="prompt">></span> 06_packaging</div>
                 <div class="block-body about-block">
                     <h3>Упаковка работы для демонстрации</h3>
-                    <p class="placeholder">// TODO: как всё упаковано для демо</p>
+                    <p>Скорее всего, вы открыли этот проект через Docker — именно так я его и упаковал. Все репозитории и модели на Hugging Face и GitHub публичные, поэтому проблем с доступом возникнуть не должно.</p>
                 </div>
             </section>
 

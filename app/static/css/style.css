@@ -172,7 +172,7 @@ h1.glitch::after {
 .terminal-block {
     border: 1px solid var(--border);
     background: var(--bg-block);
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .block-header {
@@ -189,7 +189,7 @@ h1.glitch::after {
 }
 
 .block-body {
-    padding: 16px;
+    padding: 24px;
 }
 
 /* --- buttons --- */
@@ -338,8 +338,130 @@ h1.glitch::after {
 /* --- about tab --- */
 .about-block h3 {
     color: var(--red);
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     font-size: 1rem;
+}
+
+.about-block h4 {
+    color: var(--fg);
+    margin: 28px 0 12px;
+    font-size: 0.9rem;
+}
+
+.about-block p {
+    margin-bottom: 18px;
+}
+
+.about-block a {
+    color: var(--red) !important;
+    text-decoration: none;
+    border-bottom: 1px dotted var(--red-dim);
+    transition: all 0.15s ease;
+}
+
+.about-block a:hover {
+    color: var(--green) !important;
+    border-bottom-color: var(--green);
+}
+
+.about-block ul, .about-block ol {
+    margin: 16px 0;
+}
+
+.about-block li {
+    margin-bottom: 8px;
+}
+
+/* --- code blocks --- */
+.code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--fg-dim);
+    overflow-x: auto;
+    margin: 16px 0;
+    line-height: 1.5;
+}
+
+/* --- screenshots --- */
+.screenshot-block {
+    margin: 18px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.screenshot-block img {
+    width: 100%;
+    max-width: 700px;
+    height: auto;
+    display: block;
+    border: 1px solid var(--border);
+}
+
+.screenshot-caption {
+    max-width: 700px;
+    width: 100%;
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+    margin-top: 8px;
+    padding-left: 4px;
+}
+
+.screenshot-caption::before {
+    content: "// ";
+    color: var(--red-dim);
+}
+
+/* --- artifacts list --- */
+.artifacts-list {
+    margin: 16px 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.artifacts-list li {
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.artifacts-list li::before {
+    content: "> ";
+    color: var(--red);
+    font-weight: 700;
+}
+
+.artifacts-list a {
+    color: var(--red);
+    text-decoration: none;
+    border: none;
+    padding: 0;
+    display: inline;
+    transition: all 0.15s ease;
+    word-break: break-all;
+}
+
+.artifacts-list a:hover {
+    color: var(--green);
+    text-decoration: underline;
+    text-decoration-color: var(--green);
+    background: transparent;
+}
+
+/* --- insight notes --- */
+.insight-note {
+    border-left: 3px solid var(--yellow);
+    background: rgba(224, 195, 65, 0.05);
+    padding: 12px 16px;
+    margin: 18px 0;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+}
+
+.insight-note strong {
+    color: var(--yellow);
 }
 
 .placeholder {
