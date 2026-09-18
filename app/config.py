@@ -1,22 +1,13 @@
-from functools import lru_cache
-
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from dataclasses import dataclass, field
 
 
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+@dataclass(frozen=True)
+class Settings:
+    model_repo_id: str = "angryelizar/ruBert-base-sentiment-classifier-final"
+    model_max_length: int = 267
 
-    # Hugging Face
-    hf_token: str | None = Field(default=None, description="HF access token")
-
-    # Model
-    model_repo_id: str = "angryelizar/ruBert-base-sentiment-classifier"
-    model_max_length: int = 512
-
-    # Dataset
     dataset_repo_id: str = "angryelizar/sentiment_dataset_splitted"
-    dataset_config: str | None = Field(default=None, description="Dataset config/subset name, if any")
+    dataset_config: str | None = None
     dataset_split: str = "test"
     dataset_text_column: str = "text"
     dataset_label_column: str = "label"
@@ -25,18 +16,19 @@ class Settings(BaseSettings):
     dataset_sample_size: int = 5000
 
     # Mapping from raw model labels to human-readable names
-    label_mapping: dict[str, str] = {
-        "LABEL_0": "neutral",
-        "LABEL_1": "positive",
-        "LABEL_2": "negative",
-    }
+    label_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "LABEL_0": "neutral",
+            "LABEL_1": "positive",
+            "LABEL_2": "negative",
+        }
+    )
 
-    # App
     app_title: str = "fsociety // sentiment"
-    host: str = "127.0.0.1"
-    port: int = 8000
 
 
-@lru_cache
+_settings = Settings()
+
+
 def get_settings() -> Settings:
-    return Settings()
+    return _settings

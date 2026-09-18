@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    image: ru-review-classifier-app
+    container_name: ru-review-classifier
+    ports:
+      - "8000:8000"
+    volumes:
+      - hf_cache:/app/.cache
+    restart: unless-stopped
+
+volumes:
+  hf_cache:

@@ -3,7 +3,6 @@ import random
 from typing import Any
 
 from datasets import ClassLabel, load_dataset
-from huggingface_hub import login
 from transformers import pipeline
 
 from app.config import Settings
@@ -30,9 +29,6 @@ class ModelHolder:
         return bool(self.samples)
 
     def load(self) -> None:
-        if self.settings.hf_token:
-            login(token=self.settings.hf_token)
-            logger.info("Logged in to Hugging Face Hub")
         self._load_model()
         self._load_dataset()
 
